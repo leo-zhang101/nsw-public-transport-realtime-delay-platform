@@ -16,3 +16,9 @@ This project builds an end-to-end data pipeline for analysing real-time delays i
 | route_id     | route_short_name | avg_delay_sec | max_delay_sec | events |
 |-------------|------------------|---------------|---------------|--------|
 | 1-10M-sj2-2 | 10M              | 30            | 120           | 2      |
+
+### Observations
+
+- Route 10M shows an average delay of 30 seconds, with peak delays reaching 120 seconds
+- Delay events are concentrated at major interchange stops such as Central Station
+- This suggests congestion impact during peak interchange periods
