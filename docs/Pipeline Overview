@@ -1,0 +1,5 @@
+### Pipeline Overview
+
+GTFS Static → Dimensions (routes, stops, trips)  
+GTFS Realtime → Trip Updates → Fact Table  
+Fact + Dimensions → KPI Aggregation → Analytics Outputs
