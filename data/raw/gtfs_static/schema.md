@@ -183,7 +183,10 @@ Typical files inside the GTFS ZIP (not all are always present, but NSW usually i
 - Compute delay metrics at stop-level (e.g., planned vs actual)
 
 **Time handling warning**
-- GTFS times can be `25:10:00` etc. (service after midnight).  
+- We use a custom PySpark UDF to convert HH:MM:SS (including >24h) into integer seconds.
+Formula: $seconds = hours \times 3600 + minutes \times 60 + seconds$
+This allows for direct subtraction to calculate the delay offset against Realtime timestamps.
+- GTFS times can be `25:10:00` etc. (service after midnight).
   In Silver layer, store:
   - `arrival_time_str` (original)
   - `arrival_seconds` (int) for analytics
@@ -306,3 +309,4 @@ Example:
 - Any dataset-specific quirks:
 
 ---
+
