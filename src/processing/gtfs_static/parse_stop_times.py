@@ -5,7 +5,8 @@ RAW_BASE_DIR = Path("data/raw/gtfs_static_full")
 FACT_BASE_DIR = Path("data/fact/gtfs_static")
 
 def parse_stop_times():
-    # 自动找最新 dt= 目录
+
+    
     dt_dirs = sorted([p for p in RAW_BASE_DIR.iterdir() if p.is_dir() and p.name.startswith("dt=")])
     if not dt_dirs:
         raise RuntimeError("No dt= directories found in raw GTFS static data")
