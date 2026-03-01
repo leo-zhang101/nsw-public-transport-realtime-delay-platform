@@ -1,7 +1,6 @@
 """
 delay_metrics.py
 Author: leo-zhang101
-Description: 
     Calculates operational KPIs (Route/Stop latency) for the NSW Transport platform.
     Integrated with Airflow/Docker environment.
 """
@@ -24,9 +23,7 @@ def run_kpis():
 
     df = pd.read_csv(INPUT_FILE)
 
-    # -------------------------
-    # Route-level KPIs
-    # -------------------------
+
     print("[INFO] Calculating route delay KPIs")
 
     route_kpi = (
