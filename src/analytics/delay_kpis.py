@@ -1,27 +1,24 @@
 """
-Calculate delay KPIs from enriched GTFS realtime delay data.
-
-Outputs:
-- KPI per route
-- KPI per stop
+delay_metrics.py
+Author: leo-zhang101
+Description: 
+    Calculates operational KPIs (Route/Stop latency) for the NSW Transport platform.
+    Integrated with Airflow/Docker environment.
 """
+
 
 import pandas as pd
 from pathlib import Path
 
 
-# =========================
-# Config
-# =========================
+
 INPUT_FILE = Path("data/analytics/delay_enriched.csv")
 OUTPUT_DIR = Path("data/analytics/kpis")
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# =========================
-# Main Logic
-# =========================
+
 def run_kpis():
     print("[INFO] Loading delay_enriched.csv")
 
@@ -46,13 +43,11 @@ def run_kpis():
     )
 
     route_output = OUTPUT_DIR / "kpi_route_delay.csv"
-    route_kpi.to_csv(route_output, index=False)
-
-    # -------------------------
-    # Stop-level KPIs
-    # -------------------------
+    route_kpi.to_csv(route_output, index=False
+                    
     print("[INFO] Calculating stop delay KPIs")
 
+                     
     stop_kpi = (
         df.groupby(
             ["stop_id", "stop_name"],
@@ -74,8 +69,5 @@ def run_kpis():
     print(f"[OUTPUT] {stop_output}")
 
 
-# =========================
-# Entrypoint
-# =========================
 if __name__ == "__main__":
     run_kpis()
