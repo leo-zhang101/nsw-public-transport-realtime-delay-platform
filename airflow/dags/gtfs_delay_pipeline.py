@@ -8,12 +8,13 @@ DATA_DIR = "/opt/airflow/data"
 with DAG(
     dag_id="gtfs_delay_pipeline",
     start_date=datetime(2025, 1, 1),
-    schedule_interval=None,   # 手动触发
+    # take on by hand
+    schedule_interval=None,   
     catchup=False,
     tags=["gtfs", "analytics"],
 ) as dag:
 
-    # 1.Parse realtime trip updates
+    # 1. updates
     parse_trip_updates = BashOperator(
         task_id="parse_trip_updates",
         bash_command=f"""
@@ -30,7 +31,7 @@ with DAG(
         """
     )
 
-    # 3.KPI aggregation
+    # 3.KPI 
     delay_kpis = BashOperator(
         task_id="delay_kpis",
         bash_command=f"""
@@ -38,5 +39,5 @@ with DAG(
         """
     )
 
-    # DAG 依赖关系
+    # DAG 
     parse_trip_updates >> join_delay_analysis >> delay_kpis
