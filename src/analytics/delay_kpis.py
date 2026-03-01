@@ -1,70 +1,83 @@
 """
-delay_metrics.py
+Module: analytics/delay_kpis.py
 Author: leo-zhang101
-    Calculates operational KPIs (Route/Stop latency) for the NSW Transport platform.
-    Integrated with Airflow/Docker environment.
+Function: Computes Route and Station level latency KPIs from enriched GTFS-R data.
 """
 
-
+import logging
+import sys
 import pandas as pd
 from pathlib import Path
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
-INPUT_FILE = Path("data/analytics/delay_enriched.csv")
-OUTPUT_DIR = Path("data/analytics/kpis")
-
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+INPUT_FILE = BASE_DIR / "data/analytics/delay_enriched.csv"
+OUTPUT_DIR = BASE_DIR / "data/analytics/kpis"
 
 def run_kpis():
-    print("[INFO] Loading delay_enriched.csv")
 
-    df = pd.read_csv(INPUT_FILE)
+    
+    try:
+      
+        if not INPUT_FILE.exists():
+            logger.error(f"Missing input telemetry: {INPUT_FILE}")
+            return
+
+        logger.info(f"Ingesting enriched data: {INPUT_FILE.name}")
+        df = pd.read_csv(INPUT_FILE)
+
+       
+        if "max_delay_sec" not in df.columns:
+            logger.error("Data Quality Error: Column 'max_delay_sec' not found.")
+            return
+
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-    print("[INFO] Calculating route delay KPIs")
-
-    route_kpi = (
-        df.groupby(
-            ["route_id", "route_short_name", "route_long_name"],
-            dropna=False
+        logger.info("Calculating route-level performance metrics...")
+        route_kpi = (
+            df.groupby(["route_id", "route_short_name", "route_long_name"], dropna=False)
+            .agg(
+                avg_delay_sec=("max_delay_sec", "mean"),
+                max_delay_sec=("max_delay_sec", "max"),
+                sample_count=("max_delay_sec", "count"), 
+            )
+            .round(2) 
+            .reset_index()
         )
-        .agg(
-            avg_delay_sec=("max_delay_sec", "mean"),
-            max_delay_sec=("max_delay_sec", "max"),
-            events=("max_delay_sec", "count"),
+
+        route_output = OUTPUT_DIR / "kpi_route_delay.csv"
+        route_kpi.to_csv(route_output, index=False)
+
+
+        logger.info("Calculating stop-level bottleneck metrics...")
+        stop_kpi = (
+            df.groupby(["stop_id", "stop_name"], dropna=False)
+            .agg(
+                avg_delay_sec=("max_delay_sec", "mean"),
+                max_delay_sec=("max_delay_sec", "max"),
+                sample_count=("max_delay_sec", "count"),
+            )
+            .round(2)
+            .reset_index()
         )
-        .reset_index()
-    )
 
-    route_output = OUTPUT_DIR / "kpi_route_delay.csv"
-    route_kpi.to_csv(route_output, index=False
-                    
-    print("[INFO] Calculating stop delay KPIs")
+        stop_output = OUTPUT_DIR / "kpi_stop_delay.csv"
+        stop_kpi.to_csv(stop_output, index=False)
 
-                     
-    stop_kpi = (
-        df.groupby(
-            ["stop_id", "stop_name"],
-            dropna=False
-        )
-        .agg(
-            avg_delay_sec=("max_delay_sec", "mean"),
-            max_delay_sec=("max_delay_sec", "max"),
-            events=("max_delay_sec", "count"),
-        )
-        .reset_index()
-    )
+        logger.info(f"[SUCCESS] Metrics generated at: {OUTPUT_DIR}")
 
-    stop_output = OUTPUT_DIR / "kpi_stop_delay.csv"
-    stop_kpi.to_csv(stop_output, index=False)
-
-    print("[SUCCESS] KPI files created")
-    print(f"[OUTPUT] {route_output}")
-    print(f"[OUTPUT] {stop_output}")
-
+    except Exception as e:
+       
+        logger.exception(f"Pipeline failed unexpectedly: {e}")
+        sys.exit(1) 
 
 if __name__ == "__main__":
     run_kpis()
