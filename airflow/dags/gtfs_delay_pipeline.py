@@ -14,7 +14,8 @@ with DAG(
     tags=["gtfs", "analytics"],
 ) as dag:
 
-    # 1. updates
+    # 1.Ingest and parse real-time Protobuf feed from TfNSW
+    # 2.Logical join between Real-time updates and GTFS Static schedule
     parse_trip_updates = BashOperator(
         task_id="parse_trip_updates",
         bash_command=f"""
