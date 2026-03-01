@@ -1,7 +1,8 @@
 import pandas as pd
 from pathlib import Path
 
-# ===== Paths =====
+
+
 ANALYTICS_DIR = Path("data/analytics")
 INPUT_FILE = ANALYTICS_DIR / "delay_enriched.csv"
 OUTPUT_DIR = ANALYTICS_DIR / "kpis"
@@ -13,7 +14,7 @@ def run_delay_kpis():
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # KPI 1: Top delayed routes
+
     print("[INFO] Calculating top delayed routes")
     route_kpis = (
         df.groupby(["route_id", "route_short_name", "route_long_name"])
@@ -28,7 +29,7 @@ def run_delay_kpis():
 
     route_kpis.to_csv(OUTPUT_DIR / "kpi_route_delay.csv", index=False)
 
-    # KPI 2: Top delayed stops
+
     print("[INFO] Calculating top delayed stops")
     stop_kpis = (
         df.groupby(["stop_id", "stop_name"])
